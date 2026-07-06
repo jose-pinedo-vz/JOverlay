@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <sstream>
 #include <unistd.h>
+#include <cstdio>
 
 using namespace std;
 
@@ -24,8 +25,6 @@ double tem_cpu()
 	return 0.0;
 }
 
-
-// /proc/meminfo | head -n 5
 
 double use_ram()
 {
@@ -61,9 +60,6 @@ double use_ram()
 	return stod(consumida.str());
 }
 
-
-
-
 // extraccion de el uso de la cpu
 void use_cpu(double tiempos[2])
 {
@@ -96,11 +92,6 @@ void use_cpu(double tiempos[2])
 		}
 	}
 
-// for(int i=0;i<10;i++)
-// {
-// 	cout<<valores[i]<<" 1";
-// }
-
 	double tiempoTotal{valores[0] + valores[1] + valores[2] + valores[3]};
 	double tiempoLibre{valores[3]};
 
@@ -131,14 +122,49 @@ double contro_use_cpu()
 
 }
 
+double tem_gpu()
+{
+	FILE* tuberia = popen("/bin/nvidia-smi --query-gpu=temperature.gpu,utilization.gpu,utilization.memory --format=csv,noheader,nounits", "r");
+	
+	if(!tuberia)
+	{
+		cout<<"Hubo un error\n";
+	}
+
+    char buffer[128];
+    while (fgets(buffer, sizeof(buffer), tuberia) != NULL) { }
+	
+	pclose(tuberia);
+
+	int valor1 = buffer[0] - '0';
+	int valor2 = buffer[1] - '0';
+
+
+	int tem = (valor1 * 10) + valor2;
+
+	return tem;
+	
+}
+
+// double use_gpu()
+// {
+
+// }
+
+// double use_vram()
+// {
+
+// }
 
 
 
 int main()
 {
-	cout<<"Tem prosesador "<<tem_cpu()<<"C \n";
-	cout<<"Ram usada "<<use_ram()<<" GIB\n";
-	cout<<"Prosesador use "<<contro_use_cpu()<<"%\n";
+	// cout<<"Tem prosesador "<<tem_cpu()<<"C \n";
+	// cout<<"Ram usada "<<use_ram()<<" GIB\n";
+	// cout<<"Prosesador use "<<contro_use_cpu()<<"%\n";
+
+	cout<<"temp gpu9 "<<tem_gpu()<<"\n";
 
 	return 0;
 }
