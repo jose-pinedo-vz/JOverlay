@@ -1,10 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-
 #include <iomanip>
 #include <sstream>
-
 #include <unistd.h>
 
 using namespace std;
@@ -59,6 +57,7 @@ double use_ram()
 	ramConsumida = stod(valores[0]) - stod(valores[2]);
 	ostringstream consumida;
 	consumida << fixed << setprecision(2) << ramConsumida / (1024.0 * 1024.0);
+
 	return stod(consumida.str());
 }
 
@@ -66,7 +65,7 @@ double use_ram()
 
 
 // extraccion de el uso de la cpu
-int use_cpu()
+void use_cpu(double tiempos[2])
 {
 	ifstream archivo("/proc/stat");
 
@@ -76,7 +75,6 @@ int use_cpu()
 	if(archivo.is_open())
 	{
 		getline(archivo, linea);
-		cout<<linea<<"\n";
 	}
 
 	
@@ -98,26 +96,37 @@ int use_cpu()
 		}
 	}
 
-	for(int i=0;i<10;i++)
-	{
-		cout<<valores[i]<<" 1";
-	}
-	int tiempoTotal{valores[0] + valores[1] + valores[2] + valores[3]};
-	int tiempoLibre{valores[3]};
+// for(int i=0;i<10;i++)
+// {
+// 	cout<<valores[i]<<" 1";
+// }
 
-	int tiempos[2] = {tiempoTotal, tiempoLibre};
+	double tiempoTotal{valores[0] + valores[1] + valores[2] + valores[3]};
+	double tiempoLibre{valores[3]};
 
-	return tiempos;
+	tiempos[0] = tiempoTotal;
+	tiempos[1] = tiempoLibre;
 }
 
 
-void contro_use_cpu()
+double contro_use_cpu()
 {
-	int tiempos1 = use_cpu();
-	cout<<"se completo una vuleta de manera exitosa\n";
+	double tiempos[2];
+	use_cpu(tiempos);
+	double t1 = tiempos[0];
+	double t2 = tiempos[1];
 	sleep(1);
-	int tiempos2 = use_cpu();
-	cout<<"se completo dos vueltas de manera exitosa\n";
+	use_cpu(tiempos);
+
+	float tiempoTotalPasado = t1 -  tiempos[0];
+	float tiempoLibrePasado = t2 - tiempos[1];
+
+	float resultado = (tiempoTotalPasado - tiempoLibrePasado) / tiempoTotalPasado;
+	resultado = resultado * 100;
+
+	ostringstream resultadoRedondeado;
+	resultadoRedondeado << fixed << setprecision(2) << resultado;
+	return stod(resultadoRedondeado.str());
 
 
 }
@@ -127,10 +136,9 @@ void contro_use_cpu()
 
 int main()
 {
-	// cout<<"Tem prosesador "<<tem_cpu()<<"\n";
-	// cout<<"Ram usada "<<use_ram()<<"\n";
-
-	use_cpu();
+	cout<<"Tem prosesador "<<tem_cpu()<<"C \n";
+	cout<<"Ram usada "<<use_ram()<<" GIB\n";
+	cout<<"Prosesador use "<<contro_use_cpu()<<"%\n";
 
 	return 0;
 }
