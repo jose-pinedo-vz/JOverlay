@@ -124,47 +124,94 @@ double contro_use_cpu()
 
 double tem_gpu()
 {
+	// extraccion de temperaturas de la gpu con nvidia-smi, se necesita tener instalado los drivers de nvidia y la herramienta nvidia-smi
+	// es una vercion primitiva, por el momento funcina pero si sobrepasa los 100 grados mostrara las primeras 2 sigras
+	// unicamente, eso se puede considerar un error
+
+	// refactorizar a futuro
+
 	FILE* tuberia = popen("/bin/nvidia-smi --query-gpu=temperature.gpu,utilization.gpu,utilization.memory --format=csv,noheader,nounits", "r");
-	
 	if(!tuberia)
 	{
-		cout<<"Hubo un error\n";
+		cout<<"Hubo un error. no se encontro la terjeta de video\n";
 	}
 
     char buffer[128];
     while (fgets(buffer, sizeof(buffer), tuberia) != NULL) { }
-	
 	pclose(tuberia);
+
+	// cout<<buffer<<"\n";
 
 	int valor1 = buffer[0] - '0';
 	int valor2 = buffer[1] - '0';
-
-
 	int tem = (valor1 * 10) + valor2;
-
 	return tem;
-	
 }
 
-// double use_gpu()
-// {
+// refactorizar a futuro
+double use_gpu()
+{
+	FILE* tuberia = popen("/bin/nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits", "r");
+	if(!tuberia)
+	{
+		cout<<"Hubo un error. no se encontro la terjeta de video\n";
+	}
 
-// }
+    char buffer[128];
+    while (fgets(buffer, sizeof(buffer), tuberia) != NULL) { }
+	pclose(tuberia);
+	// cout<<buffer<<"\n";
 
-// double use_vram()
-// {
+	int valor1 = buffer[0] - '0';
 
-// }
+	int use;
+	if (buffer[1] == '\n' || buffer[1] == ',' || buffer[1] == ' ' || buffer[1] == '\0') {
+		use = valor1; 
+	} else {
+		int valor2 = buffer[1] - '0';
+		use = (valor1 * 10) + valor2;
+	}
+
+	return use;
+}
+
+// refactorizar a futuro
+double use_vram()
+{
+	FILE* tuberia = popen("/bin/nvidia-smi --query-gpu=utilization.memory --format=csv,noheader,nounits", "r");
+	if(!tuberia)
+	{
+		cout<<"Hubo un error. no se encontro la terjeta de video\n";
+	}
+
+    char buffer[128];
+    while (fgets(buffer, sizeof(buffer), tuberia) != NULL) { }
+	pclose(tuberia);
+	// cout<<buffer<<"\n";
+
+	int valor1 = buffer[0] - '0';
+
+	int use;
+	if (buffer[1] == '\n' || buffer[1] == ',' || buffer[1] == ' ' || buffer[1] == '\0') {
+		use = valor1; 
+	} else {
+		int valor2 = buffer[1] - '0';
+		use = (valor1 * 10) + valor2;
+	}
+
+	return use;
+}
 
 
 
 int main()
 {
-	// cout<<"Tem prosesador "<<tem_cpu()<<"C \n";
-	// cout<<"Ram usada "<<use_ram()<<" GIB\n";
-	// cout<<"Prosesador use "<<contro_use_cpu()<<"%\n";
-
-	cout<<"temp gpu9 "<<tem_gpu()<<"\n";
+	cout<<"Prosesador use "<<contro_use_cpu()<<"%\n";
+	cout<<"Tem prosesador "<<tem_cpu()<<"C \n";
+	cout<<"Ram usada "<<use_ram()<<" GIB\n";
+	cout<<"temp gpu "<<tem_gpu()<<"C\n";
+	cout<<"use gpu "<<use_gpu()<<"%\n";
+	cout<<"use vram "<<use_vram()<<"%\n";
 
 	return 0;
 }
